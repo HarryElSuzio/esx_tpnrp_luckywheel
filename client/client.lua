@@ -2,7 +2,7 @@ ESX = nil
 local _wheel = nil
 local _lambo = nil
 local _isShowCar = false
-local _wheelPos = vector3(1109.76, 227.89, -49.64)
+local _wheelPos = vector3(976.25, 50.78, 74.68)
 local _baseWheelPos = vector3(1111.05, 229.81, -50.38)
 local Keys = {
 	["ESC"] = 322, ["BACKSPACE"] = 177, ["E"] = 38, ["ENTER"] = 18,	["LEFT"] = 174, ["RIGHT"] = 175, ["TOP"] = 27, ["DOWN"] = 173
@@ -10,65 +10,28 @@ local Keys = {
 local _isRolling = false
 
 Citizen.CreateThread(function()
-	while ESX == nil do
-		TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
-		Citizen.Wait(0)
-	end
-	while not ESX.IsPlayerLoaded() do 
+    while ESX == nil do
+        TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
+        Citizen.Wait(0)
+    end
+    while not ESX.IsPlayerLoaded() do 
         Citizen.Wait(500)
     end
 
     if ESX.IsPlayerLoaded() then
         local model = GetHashKey('vw_prop_vw_luckywheel_02a')
-        local baseWheelModel GetHashKey('vw_prop_vw_luckywheel_01a')
-        local carmodel = GetHashKey('lp700r')
-
         Citizen.CreateThread(function()
-            -- Base wheel
-            RequestModel(baseWheelModel)
-            while not HasModelLoaded(baseWheelModel) do
-                Citizen.Wait(0)
-            end
-
-            _basewheel = CreateObject(baseWheelModel, _baseWheelPos.x, _baseWheelPos.y, _baseWheelPos.z, false, false, true)
-            SetEntityHeading(_basewheel, 0.0)
-            SetModelAsNoLongerNeeded(baseWheelModel)
-
-            -- Wheel
             RequestModel(model)
-
             while not HasModelLoaded(model) do
                 Citizen.Wait(0)
             end
-
-            _wheel = CreateObject(model, 1111.05, 229.81, -50.38, false, false, true)
-            SetEntityHeading(_wheel, 0.0)
+            _wheel = CreateObject(model, 978.0117, 50.3487, 73.9561, false, false, true)
+            SetEntityHeading(_wheel, -30.9754)
             SetModelAsNoLongerNeeded(model)
-            
-            -- Car
-            RequestModel(carmodel)
-            while not HasModelLoaded(carmodel) do
-                Citizen.Wait(0)
-            end
-
-            local vehicle = CreateVehicle(carmodel, 1100.39, 220.09, -51.0, 0.0, false, false)
-            
-            SetModelAsNoLongerNeeded(carmodel)
-            
-
-            -- RequestCollisionAtCoord(1100.39, 220.09, -48.75)
-
-            -- while not HasCollisionLoadedAroundEntity(vehicle) do
-            --     RequestCollisionAtCoord(1100.39, 220.09, -48.75)
-            --     Citizen.Wait(0)
-            -- end
-
-            -- SetVehRadioStation(vehicle, 'OFF')
-            FreezeEntityPosition(vehicle, true)
-            local _curPos = GetEntityCoords(vehicle)
-            SetEntityCoords(vehicle, _curPos.x, _curPos.y, _curPos.z + 1, false, false, true, true)
-            _lambo = vehicle
-            
+            Citizen.InvokeNative(0x651D3228960D08AF, "SE_DLC_APT_Yacht_Exterior_04", _wheel)
+            SetEmitterRadioStation("SE_DLC_APT_Yacht_Exterior_04", GetRadioStationName(1))
+            SetStaticEmitterEnabled("SE_DLC_APT_Yacht_Exterior_04", true)
+            spawnveh()      
         end)
     end
 end)
@@ -87,8 +50,7 @@ end)
 RegisterNetEvent("esx_tpnrp_luckywheel:doRoll")
 AddEventHandler("esx_tpnrp_luckywheel:doRoll", function(_priceIndex) 
     _isRolling = true
-    SetEntityHeading(_wheel, -30.0)
-    SetEntityRotation(_wheel, 0.0, 0.0, 0.0, 1, true)
+   SetEntityHeading(_wheel, -30.9754)
     Citizen.CreateThread(function()
         local speedIntCnt = 1
         local rollspeed = 1.0
@@ -117,8 +79,9 @@ AddEventHandler("esx_tpnrp_luckywheel:doRoll", function(_priceIndex)
             --         _y = _winAngle
             --     end
             -- end
-            SetEntityRotation(_wheel, 0.0, _y, 0.0, 1, true)
-            Citizen.Wait(0)
+            SetEntityHeading(_wheel, -30.9754)
+              SetEntityRotation(_wheel, 0.0, _y, -30.9754, 2, true)
+            Citizen.Wait(5)
         end
     end)
 end)
@@ -139,7 +102,7 @@ function doRoll()
         end
         local lib, anim = _lib, 'enter_right_to_baseidle'
         ESX.Streaming.RequestAnimDict(lib, function()
-            local _movePos = vector3(1109.55, 228.88, -49.64)
+            local _movePos = vector3(976.25, 50.78, 74.68)
             TaskGoStraightToCoord(playerPed,  _movePos.x,  _movePos.y,  _movePos.z,  1.0,  -1,  312.2,  0.0)
             local _isMoved = false
             while not _isMoved do
@@ -172,10 +135,38 @@ Citizen.CreateThread(function()
         local coords = GetEntityCoords(PlayerPedId())
 
         if(GetDistanceBetweenCoords(coords, _wheelPos.x, _wheelPos.y, _wheelPos.z, true) < 1.5) and not _isRolling then
-            ESX.ShowHelpNotification("Bấm E để thử vận may với Vòng Quay 1 lần 100,000$")
+            ESX.ShowHelpNotification("Spin for your chance to win 100,000$")
             if IsControlJustReleased(0, Keys['E']) then
                 doRoll()
             end
         end		
 	end
 end)
+
+function spawnveh()
+
+    Zones = {
+        VehicleSpawnPoint = {
+            Pos   = {x = 963.75, y = 47.50, z = 75.75},
+            Heading = 120.00
+        }
+    }
+
+    local carmodel = GetHashKey('panto')
+    RequestModel(carmodel)
+    while not HasModelLoaded(carmodel) do
+        Citizen.Wait(0)
+    end
+
+    ESX.Game.SpawnLocalVehicle(carmodel,  Zones.VehicleSpawnPoint.Pos, Zones.VehicleSpawnPoint.Heading, function(vehicle)
+        Citizen.Wait(10)
+        SetEntityAsMissionEntity(vehicle, true, true)
+        SetVehicleHasBeenOwnedByPlayer(vehicle, true)
+        SetVehicleOnGroundProperly(vehicle)
+        Citizen.Wait(10)
+        FreezeEntityPosition(vehicle, true)
+        SetEntityInvincible(vehicle, true)
+        SetVehicleDoorsLocked(vehicle, 2)
+        _lambo = vehicle
+    end)
+end
