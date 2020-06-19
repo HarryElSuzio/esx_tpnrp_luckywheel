@@ -1,4 +1,5 @@
 ESX = nil
+
 local _wheel = nil
 local _lambo = nil
 local _isShowCar = false
@@ -28,13 +29,14 @@ Citizen.CreateThread(function()
             _wheel = CreateObject(model, 978.0117, 50.3487, 73.9561, false, false, true)
             SetEntityHeading(_wheel, -30.9754)
             SetModelAsNoLongerNeeded(model)
-            Citizen.InvokeNative(0x651D3228960D08AF, "SE_DLC_APT_Yacht_Exterior_04", _wheel)
-            SetEmitterRadioStation("SE_DLC_APT_Yacht_Exterior_04", GetRadioStationName(1))
-            SetStaticEmitterEnabled("SE_DLC_APT_Yacht_Exterior_04", true)
+          -- Citizen.InvokeNative(0x651D3228960D08AF, "SE_DLC_APT_Yacht_Exterior_04", _wheel)
+        -- SetEmitterRadioStation("SE_DLC_APT_Yacht_Exterior_04", GetRadioStationName(1))
+           --SetStaticEmitterEnabled("SE_DLC_APT_Yacht_Exterior_04", true)
             spawnveh()      
         end)
     end
 end)
+
 
 Citizen.CreateThread(function() 
     while true do
@@ -133,14 +135,23 @@ Citizen.CreateThread(function()
 	while true do
         Citizen.Wait(1)
         local coords = GetEntityCoords(PlayerPedId())
-
         if(GetDistanceBetweenCoords(coords, _wheelPos.x, _wheelPos.y, _wheelPos.z, true) < 1.5) and not _isRolling then
-            ESX.ShowHelpNotification("Spin for your chance to win 100,000$")
+            ESX.ShowHelpNotification("Press ~INPUT_CONTEXT~ to gamble! ~r~50k per spin")
             if IsControlJustReleased(0, Keys['E']) then
+               ESX.TriggerServerCallback('thespinnyspin', function(hasEnoughMoney)
+                if hasEnoughMoney then 
+                    ESX.ShowNotification("You paid $50,000 and spin the wheel. Good luck!")
+
                 doRoll()
-            end
-        end		
-	end
+                TriggerServerEvent('InteractSound_SV:PlayWithinDistance', 1.0, 'the-wheel', 0.3)
+            else
+                print("no roll for you")
+                  ESX.ShowNotification("You do not have enough money to play. It cost $50,000 to spin.")
+                  end
+                end)
+             end
+        end
+    end
 end)
 
 function spawnveh()
@@ -170,3 +181,4 @@ function spawnveh()
         _lambo = vehicle
     end)
 end
+
